@@ -1,0 +1,23 @@
+{
+  "name": "firebase_login",
+  "version": "1.0.0",
+  "description": "",
+  "main": "firebase_config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cloud-firestore": "^0.0.60",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "firebase": "^9.15.0",
+    "firebase-admin": "^11.4.1",
+    "http": "^0.0.1-security",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.20",
+    "path": "^0.12.7"
+  }
+}
