@@ -21,6 +21,7 @@ const config = {
     appId: "1:852226509147:web:9cd9a6a0daf56b5438327e"
 };
 fb.initializeApp(config)
+
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     await auth.signInWithEmailAndPassword(auth.getAuth(), email, password)
@@ -48,7 +49,7 @@ router.post("/signup", async (req, res) => {
 
 
 router.post('/create-user', async (req, res) => {
-    const { firstName, lastName, phone, userCode, birthDay, department, gender, education, email, uid } = req.body;
+    const { firstName, lastName, role, phone, userCode, birthDay, department, gender, education, email, uid } = req.body;
     const data = {
         "first_name": firstName,
         "last_name": lastName,
@@ -59,6 +60,7 @@ router.post('/create-user', async (req, res) => {
         "gender": gender,
         "education": education,
         "email": email,
+        "user_role": role,
     }
 
     return await db.collection("users").doc(uid).set(data)
@@ -70,6 +72,26 @@ router.post('/create-user', async (req, res) => {
         });
 
 
+})
+
+
+// get user details
+router.get("/get-user/:username", async (req, res) => {
+    const userName = req.params.username;
+    return await admin.firestore()
+        .collection("users")
+        .where("email", "==", userName)
+        .get()
+        .then((snapshot) => {
+            let result = [];
+            for (var re of snapshot.docs){
+                result.push(re.data())
+            }
+            return res.status(200).json({ "users": result});
+        })
+        .catch(error => {
+            return res.status(500).json({ "message": `get user information failed ${error}` })
+        })
 })
 
 module.exports = router
