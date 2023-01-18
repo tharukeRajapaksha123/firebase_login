@@ -14,6 +14,7 @@ admin.initializeApp({
 
 const fb = require("firebase/app");
 const auth = require("firebase/auth")
+const db = admin.firestore()
 
 const config = {
    apiKey: "AIzaSyBk7vup9NfSyXm_HsBB4xl5GTGEJSmj9g0",
@@ -76,6 +77,32 @@ app.post("/signup", async (req, res) => {
    }).catch(err => {
       return res.status(500).json({ "error": err })
    });
+})
+
+
+app.post('/create-user', async (req, res) => {
+   const { firstName, lastName, phone, userCode, birthDay, department, gender, education, email, uid } = req.body;
+   const data = {
+      "first_name": firstName,
+      "last_name": lastName,
+      "phone": phone,
+      "user_code": userCode,
+      "date_of_birth": Date(birthDay),
+      "department": department,
+      "gender": gender,
+      "education": education,
+      "email": email,
+   }
+
+   return await db.collection("users").doc(uid).set(data)
+      .then((val) => {
+         return res.status(201).json({ "message": "user created succesfully" });
+      }).catch(err => {
+         console.log(`set firestore data failed ${err}`);
+         return res.status(500).json({ "message": `data insertion failed ${err}` });
+      });
+
+
 })
 
 
