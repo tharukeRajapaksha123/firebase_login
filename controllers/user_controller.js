@@ -73,10 +73,11 @@ router.post('/create-user', async (req, res) => {
 
 })
 
-router.put('/edit-user', (req, res) => {
+// Edit User
+router.put('/edit-user', async (req, res) => {
     const uid = req.body.uid;
     const data = req.body.data;
-    db.collection("users").doc(uid).update(data)
+    await db.collection("users").doc(uid).update(data)
       .then(() => {
           return res.status(201).json({ "message": "user updated succesfully" });
       }).catch(err => {
@@ -85,9 +86,10 @@ router.put('/edit-user', (req, res) => {
       });
   });
 
-  router.delete('/delete-user', (req, res) => {
+// Delete User
+  router.delete('/delete-user', async (req, res) => {
     const uid = req.body.uid;
-    db.collection('users').doc(uid).delete()
+    await db.collection('users').doc(uid).delete()
       .then(() => {
           return res.status(201).json({ "message": "user deleted succesfully" });
       }).catch(err => {
@@ -95,5 +97,44 @@ router.put('/edit-user', (req, res) => {
           return res.status(501).json({ "message": `data deletion failed ${err}` });
       });
   });
+
+// Create a new group
+router.post('/create-group', (req, res) => {
+  const groupName = req.body.groupName;
+  admin.auth().createGroup(groupName)
+    .then((group) => {
+      res.status(201).json({ group });
+    })
+    .catch((error) => {
+      res.status(501).json({ error });
+    });
+});
+
+// Add users to a group
+router.post('/group/:id/members', async (req, res) => {
+    const groupId = req.params.id;
+    const instructors = req.body.instructors; 
+    const participants = req.body.participants; 
+    
+    try {
+        await Group.addInstructors(groupId, instructors);
+        await Group.addParticipants(groupId, participants);
+        res.status(201).json({ message: 'Members added to group successfully' });
+    } catch (error) {
+        res.status(501).json({ message: 'Error adding members to group', error });
+    }
+});
+
+// Get all members of a group
+router.get('/group-members', (req, res) => {
+  const groupId = req.query.groupId;
+  admin.auth().listUsers(1000, 'customClaims.groupId==' + groupId)
+    .then((listUsersResult) => {
+      res.status(201).json({ users: listUsersResult.users });
+    })
+    .catch((error) => {
+      res.status(501).json({ error });
+    });
+});
 
 module.exports = router
