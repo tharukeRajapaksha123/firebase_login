@@ -21,6 +21,7 @@ const config = {
     appId: "1:852226509147:web:9cd9a6a0daf56b5438327e"
 };
 fb.initializeApp(config)
+
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     await auth.signInWithEmailAndPassword(auth.getAuth(), email, password)
@@ -71,5 +72,28 @@ router.post('/create-user', async (req, res) => {
 
 
 })
+
+router.put('/edit-user', (req, res) => {
+    const uid = req.body.uid;
+    const data = req.body.data;
+    db.collection("users").doc(uid).update(data)
+      .then(() => {
+          return res.status(201).json({ "message": "user updated succesfully" });
+      }).catch(err => {
+          console.log(`update firestore data failed ${err}`);
+          return res.status(500).json({ "message": `data update failed ${err}` });
+      });
+  });
+
+  router.delete('/delete-user', (req, res) => {
+    const uid = req.body.uid;
+    db.collection('users').doc(uid).delete()
+      .then(() => {
+          return res.status(201).json({ "message": "user deleted succesfully" });
+      }).catch(err => {
+          console.log(`deleting firestore data failed ${err}`);
+          return res.status(501).json({ "message": `data deletion failed ${err}` });
+      });
+  });
 
 module.exports = router
