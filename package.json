@@ -1,10 +1,10 @@
 {
   "name": "firebase_login",
   "version": "1.0.0",
-  "description": "",
   "main": "firebase_config.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
@@ -19,5 +19,14 @@
     "morgan": "^1.10.0",
     "nodemon": "^2.0.20",
     "path": "^0.12.7"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tharukeRajapaksha123/firebase_login.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tharukeRajapaksha123/firebase_login/issues"
+  },
+  "homepage": "https://github.com/tharukeRajapaksha123/firebase_login#readme",
+  "description": ""
 }

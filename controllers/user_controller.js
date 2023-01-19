@@ -94,4 +94,27 @@ router.get("/get-user/:username", async (req, res) => {
         })
 })
 
+
+router.put('/edit-user', (req, res) => {
+    const uid = req.body.uid;
+    const data = req.body.data;
+    db.collection("users").doc(uid).update(data)
+      .then(() => {
+          return res.status(201).json({ "message": "user updated succesfully" });
+      }).catch(err => {
+          console.log(`update firestore data failed ${err}`);
+          return res.status(500).json({ "message": `data update failed ${err}` });
+      });
+  });
+
+  router.delete('/delete-user', (req, res) => {
+    const uid = req.body.uid;
+    db.collection('users').doc(uid).delete()
+      .then(() => {
+          return res.status(201).json({ "message": "user deleted succesfully" });
+      }).catch(err => {
+          console.log(`deleting firestore data failed ${err}`);
+          return res.status(501).json({ "message": `data deletion failed ${err}` });
+      });
+  });
 module.exports = router
