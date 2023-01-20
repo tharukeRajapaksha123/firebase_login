@@ -98,42 +98,130 @@ router.put('/edit-user', async (req, res) => {
       });
   });
 
-// Create a new group
-router.post('/create-group', (req, res) => {
-  const groupName = req.body.groupName;
-  admin.auth().createGroup(groupName)
-    .then((group) => {
-      res.status(201).json({ group });
+//Create group
+router.post('/create-group', async (req, res) => {
+  const { title, trainerId, users } = req.body;
+
+  try {
+      const groupRef = await db.collection('userGroups').add({
+          'title': title,
+          'created_at': admin.firestore.FieldValue.serverTimestamp(),
+          'trainer_id': '',
+          'trainers': trainerId,
+          'course_ids': [],
+          'playbook_ids': [],
+          'diary_ids': [],
+          'survey_ids': [],
+          'exam_avarage': null,
+          'assessment_avarage': null,
+          'on_break': false,
+      });
+
+      // Update the 'groups' field of the trainers in the 'instructors' collection
+      for (const trainer of trainerId) {
+          const trainerRef = db.collection('instructors').doc(trainer);
+          await trainerRef.update({
+              'groups': admin.firestore.FieldValue.arrayUnion([groupRef.id]),
+          });
+      }
+
+      // Update the 'user_group_id' field of the users in the 'users' collection
+      for (const user of users) {
+          const userRef = _firestore.collection('users').doc(user.id);
+          await userRef.update({
+              'user_group_id': groupRef.id,
+          });
+      }
+
+      // Return the group data
+      const groupSnapshot = await groupRef.get();
+      const groupData = groupSnapshot.data();
+      groupData.id = groupRef.id;
+      return res.status(201).json(groupData);
+  } catch (err) {
+      console.log(`Error creating group: ${err}`);
+      return res.status(500).json({ "message": `Error creating group: ${err}` });
+  }
+});
+
+// Remove a user from the group
+router.delete('/remove-user-from-group/:groupId/:userId', async (req, res) => {
+    const groupId = req.params.groupId;
+    const userId = req.params.userId;
+    const groupRef = db.collection("userGroups").doc(groupId);
+
+    // Get the current array of participants
+    const groupSnapshot = await groupRef.get();
+    const participants = groupSnapshot.data().participants;
+
+    // Remove the user from the array
+    const updatedParticipants = participants.filter(id => id !== userId);
+
+    // Update the participants array in the userGroup document
+    return groupRef.update({
+        participants: updatedParticipants
     })
-    .catch((error) => {
-      res.status(501).json({ error });
+    .then(() => {
+        return res.status(200).json({ "message": "user removed from group successfully" });
+    })
+    .catch(err => {
+        console.log(`Error removing user from group: ${err}`);
+        return res.status(500).json({ "message": `Error removing user from group: ${err}` });
     });
 });
 
-// Add users to a group
-router.post('/group/:id/members', async (req, res) => {
-    const groupId = req.params.id;
-    const instructors = req.body.instructors; 
-    const participants = req.body.participants; 
-    
-    try {
-        await Group.addInstructors(groupId, instructors);
-        await Group.addParticipants(groupId, participants);
-        res.status(201).json({ message: 'Members added to group successfully' });
-    } catch (error) {
-        res.status(501).json({ message: 'Error adding members to group', error });
-    }
+
+
+// Assign courses to group
+router.put('/assign-courses-to-group/:groupId', async (req, res) => {
+    const groupId = req.params.groupId;
+    const { courseIds } = req.body;
+    const groupRef = db.collection("userGroups").doc(groupId);
+
+    const groupSnapshot = await groupRef.get();
+    let courses = groupSnapshot.data().courses;
+
+    if(!courses) courses = []
+
+    // Add the new courses to the array
+    courses.push(...courseIds);
+
+    // Update the courses array in the userGroup document
+    return groupRef.update({
+        courses: courses
+    })
+    .then(() => {
+        return res.status(200).json({ "message": "Courses assigned to group successfully" });
+    })
+    .catch(err => {
+        console.log(`Error assigning courses to group: ${err}`);
+        return res.status(500).json({ "message": `Error assigning courses to group: ${err}` });
+    });
 });
 
-// Get all members of a group
-router.get('/group-members', (req, res) => {
-  const groupId = req.query.groupId;
-  admin.auth().listUsers(1000, 'customClaims.groupId==' + groupId)
-    .then((listUsersResult) => {
-      res.status(201).json({ users: listUsersResult.users });
+// Unaasign courses from group
+router.put('/unassign-courses-from-group/:groupId', async (req, res) => {
+    const groupId = req.params.groupId;
+    const { courseIds } = req.body;
+
+    const groupRef = db.collection("userGroups").doc(groupId);
+
+    const groupSnapshot = await groupRef.get();
+    let courses = groupSnapshot.data().courses;
+
+    // Remove the courses from the array
+    const updatedCourses = courses.filter(id => !courseIds.includes(id));
+
+    // Update the courses array in the userGroup document
+    return groupRef.update({
+        courses: updatedCourses
     })
-    .catch((error) => {
-      res.status(501).json({ error });
+    .then(() => {
+        return res.status(200).json({ "message": "Courses unassigned from group successfully" });
+    })
+    .catch(err => {
+        console.log(`Error unassigning courses from group: ${err}`);
+        return res.status(500).json({ "message": `Error unassigning courses from group: ${err}` });
     });
 });
 
