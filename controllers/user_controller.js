@@ -138,7 +138,7 @@ router.put("/unblock-user/:uid", async (req, res) => {
 })
 
 router.get("/send-notification-all", (req, res) => {
-    
+
     const key = "cuFI4OvaTLSdDpsoMvb1JD:APA91bEvx2Z-_qcy-_9egaE5bP0tF7kwiZbqa8e0z0RzjGowea0hYaNOI1dUd2DCP5UtTpVcGvibMa2ba8jREeaWsifzYYre9R9p0RtHQTaiaNmT3Br0IIxDVPHBvS1gvGYJfBOV5o1F";
 
     var serverKey = key //put your server key here
@@ -167,8 +167,60 @@ router.get("/send-notification-all", (req, res) => {
         }
     });
 
-    return res.status(200).json({"message" :"notified succesfully"})
+    return res.status(200).json({ "message": "notified succesfully" })
 })
 
+
+// Create a new group
+router.post('/create-group', async (req, res) => {
+    const groupName = req.body.groupName;
+    const data = {
+        "assessment_avarage": req.body.assessment_avarage ?? null,
+        "course_ids" : req.body.re ?? null,
+        "created_at" : Date(),
+        "diary_ids" : req.body.diary_ids ?? null,
+        "exam_averages" : req.body.exam_averages ?? null,
+        "on_break" : req.body.on_break ?? null,
+        "playbook_ids" : req.body.playbook_ids ?? null,
+        "survey_ids" : req.body.survey_ids ?? null,
+        "title" : req.body.title ?? null,
+        "trainer_id" : req.body.trainer_id ?? null,
+        "trainers" : req.body.trainers ?? null,
+    }
+    return await db.collection("userGroups").add(data)
+        .then((group) => {
+            return res.status(201).json({ group });
+        })
+        .catch((error) => {
+            return res.status(501).json({ error });
+        });
+});
+
+// Add users to a group
+router.post('/group/:id/members', async (req, res) => {
+    const groupId = req.params.id;
+    const instructors = req.body.instructors;
+    const participants = req.body.participants;
+
+    try {
+        await Group.addInstructors(groupId, instructors);
+        await Group.addParticipants(groupId, participants);
+        res.status(201).json({ message: 'Members added to group successfully' });
+    } catch (error) {
+        res.status(501).json({ message: 'Error adding members to group', error });
+    }
+});
+
+// Get all members of a group
+router.get('/group-members', (req, res) => {
+    const groupId = req.query.groupId;
+    admin.auth().listUsers(1000, 'customClaims.groupId==' + groupId)
+        .then((listUsersResult) => {
+            res.status(201).json({ users: listUsersResult.users });
+        })
+        .catch((error) => {
+            res.status(501).json({ error });
+        });
+});
 
 module.exports = router
