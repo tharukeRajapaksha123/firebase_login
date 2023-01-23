@@ -7,6 +7,7 @@ const cors = require('cors')
 
 const userController = require("./controllers/user_controller")
 const groupController = require("./controllers/group_controller")
+const notificationController = require("./controllers/notification_controller")
 
 var app = express();
 const port = 8080
@@ -22,5 +23,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use("/",userController)
 app.use("/group-controller",groupController)
+app.use("/notification-controller",notificationController)
 
 http.createServer(app).listen(port, () => console.log(`Server is running on port ${port}`));
