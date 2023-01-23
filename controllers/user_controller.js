@@ -225,13 +225,14 @@ router.put('/unassign-courses-from-group/:groupId', async (req, res) => {
     });
 });
 
-//Add Assessment to a module
-router.post('/add-module-assessment', async (req, res) => {
+//Assign Assessment to a module
+router.post('/assign-assessment', async (req, res) => {
     try {
         const module = req.body;
+        const assessment_id = req.body.assessment_id;
         const db = admin.firestore();
-        await db.collection('modules').doc(module.id).set({
-            'assessment_id': module.assessmentId 
+        await db.collection('modules').doc(module.id).update({
+            'assessment_id': assessment_id
         });
         res.status(200).send({ success: true });
     } catch (error) {
@@ -240,13 +241,46 @@ router.post('/add-module-assessment', async (req, res) => {
     }
 });
 
-//Add Exam to a module
-router.post('/add-module-exam', async (req, res) => {
+
+//Unassign Assessment from a module
+router.post('/unassign-assessment', async (req, res) => {
     try {
         const module = req.body;
         const db = admin.firestore();
-        await db.collection('modules').doc(module.id).set({
-            'exam_id': module.examId 
+        await db.collection('modules').doc(module.id).update({
+            'assessment_id': admin.firestore.FieldValue.delete()
+        });
+        res.status(200).send({ success: true });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ success: false, error });
+    }
+});
+
+//Assign Exam to a module
+router.post('/assign-exam', async (req, res) => {
+    try {
+        const module = req.body;
+        const exam_id = req.body.exam_id;
+        const db = admin.firestore();
+        await db.collection('modules').doc(module.id).update({
+            'exam_id': exam_id
+        });
+        res.status(200).send({ success: true });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ success: false, error });
+    }
+});
+
+
+//Unassign Exam from a module
+router.post('/unassign-exam', async (req, res) => {
+    try {
+        const module = req.body;
+        const db = admin.firestore();
+        await db.collection('modules').doc(module.id).update({
+            'exam_id': admin.firestore.FieldValue.delete()
         });
         res.status(200).send({ success: true });
     } catch (error) {
