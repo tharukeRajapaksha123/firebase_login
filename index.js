@@ -6,6 +6,7 @@ var logger = require('morgan');
 const cors = require('cors')
 
 const userController = require("./controllers/user_controller")
+const groupController = require("./controllers/group_controller")
 
 var app = express();
 const port = 8080
@@ -18,7 +19,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use("/",userController)
 
+app.use("/",userController)
+app.use("/group-controller",groupController)
 
 http.createServer(app).listen(port, () => console.log(`Server is running on port ${port}`));

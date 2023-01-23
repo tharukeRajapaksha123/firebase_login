@@ -171,56 +171,6 @@ router.get("/send-notification-all", (req, res) => {
 })
 
 
-// Create a new group
-router.post('/create-group', async (req, res) => {
-    const groupName = req.body.groupName;
-    const data = {
-        "assessment_avarage": req.body.assessment_avarage ?? null,
-        "course_ids" : req.body.re ?? null,
-        "created_at" : Date(),
-        "diary_ids" : req.body.diary_ids ?? null,
-        "exam_averages" : req.body.exam_averages ?? null,
-        "on_break" : req.body.on_break ?? null,
-        "playbook_ids" : req.body.playbook_ids ?? null,
-        "survey_ids" : req.body.survey_ids ?? null,
-        "title" : req.body.title ?? null,
-        "trainer_id" : req.body.trainer_id ?? null,
-        "trainers" : req.body.trainers ?? null,
-    }
-    return await db.collection("userGroups").add(data)
-        .then((group) => {
-            return res.status(201).json({ group });
-        })
-        .catch((error) => {
-            return res.status(501).json({ error });
-        });
-});
 
-// Add users to a group
-router.post('/group/:id/members', async (req, res) => {
-    const groupId = req.params.id;
-    const instructors = req.body.instructors;
-    const participants = req.body.participants;
-
-    try {
-        await Group.addInstructors(groupId, instructors);
-        await Group.addParticipants(groupId, participants);
-        res.status(201).json({ message: 'Members added to group successfully' });
-    } catch (error) {
-        res.status(501).json({ message: 'Error adding members to group', error });
-    }
-});
-
-// Get all members of a group
-router.get('/group-members', (req, res) => {
-    const groupId = req.query.groupId;
-    admin.auth().listUsers(1000, 'customClaims.groupId==' + groupId)
-        .then((listUsersResult) => {
-            res.status(201).json({ users: listUsersResult.users });
-        })
-        .catch((error) => {
-            res.status(501).json({ error });
-        });
-});
 
 module.exports = router
