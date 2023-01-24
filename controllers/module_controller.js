@@ -14,8 +14,8 @@ router.post('/add-module-assessment', async (req, res) => {
     try {
         const module = req.body;
         const db = admin.firestore();
-        await db.collection('modules').doc(module.id).set({
-            'assessment_id': module.assessmentId 
+        await db.collection('modules').doc(module.id).update({
+            'assessment_id': module.assessmentId
         });
         res.status(200).send({ success: true });
     } catch (error) {
@@ -29,8 +29,8 @@ router.post('/add-module-exam', async (req, res) => {
     try {
         const module = req.body;
         const db = admin.firestore();
-        await db.collection('modules').doc(module.id).set({
-            'exam_id': module.examId 
+        await db.collection('modules').doc(module.id).update({
+            'exam_id': module.examId
         });
         res.status(200).send({ success: true });
     } catch (error) {
@@ -38,5 +38,33 @@ router.post('/add-module-exam', async (req, res) => {
         res.status(500).send({ success: false, error });
     }
 });
+router.delete('/remove-module-exam/:moduleId', async (req, res) => {
+    try {
+        const moduleId = req.params.moduleId;
+        const db = admin.firestore();
+        await db.collection('modules').doc(moduleId).update({
+            'exam_id': null
+        });
+        res.status(200).send({ success: true });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ success: false, error });
+    }
+});
+router.delete('/remove-module-assesment/:moduleId', async (req, res) => {
+    try {
+        const moduleId = req.params.moduleId;
+        const db = admin.firestore();
+        await db.collection('modules').doc(moduleId).update({
+            'assessment_id': null,
+        });
+        res.status(200).send({ success: true });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ success: false, error });
+    }
+});
+
+
 
 module.exports = router
