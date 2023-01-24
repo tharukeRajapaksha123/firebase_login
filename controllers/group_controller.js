@@ -164,4 +164,29 @@ router.get('/group-members/:groupId', (req, res) => {
         });
 });
 
+router.delete('/remove-user-from-group/:groupId/:userId', async (req, res) => {
+    const groupId = req.params.groupId;
+    const userId = req.params.userId;
+    const groupRef = db.collection("userGroups").doc(groupId);
+
+    // Get the current array of participants
+    const groupSnapshot = await groupRef.get();
+    const participants = groupSnapshot.data().participants;
+
+    // Remove the user from the array
+    const updatedParticipants = participants.filter(id => id !== userId);
+
+    // Update the participants array in the userGroup document
+    return groupRef.update({
+        participants: updatedParticipants
+    })
+    .then(() => {
+        return res.status(200).json({ "message": "user removed from group successfully" });
+    })
+    .catch(err => {
+        console.log(`Error removing user from group: ${err}`);
+        return res.status(500).json({ "message": `Error removing user from group: ${err}` });
+    });
+});
+
 module.exports = router
