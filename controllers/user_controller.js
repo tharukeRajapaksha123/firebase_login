@@ -137,38 +137,6 @@ router.put("/unblock-user/:uid", async (req, res) => {
     })
 })
 
-router.get("/send-notification-all", (req, res) => {
-
-    const key = "cuFI4OvaTLSdDpsoMvb1JD:APA91bEvx2Z-_qcy-_9egaE5bP0tF7kwiZbqa8e0z0RzjGowea0hYaNOI1dUd2DCP5UtTpVcGvibMa2ba8jREeaWsifzYYre9R9p0RtHQTaiaNmT3Br0IIxDVPHBvS1gvGYJfBOV5o1F";
-
-    var serverKey = key //put your server key here
-    var fcm = new FCM(serverKey);
-
-    var message = { //this may vary according to the message type (single recipient, multicast, topic, et cetera)
-        to: 'registration_token',
-        collapse_key: 'your_collapse_key',
-
-        notification: {
-            title: 'Title of your push notification',
-            body: 'Body of your push notification'
-        },
-
-        data: {  //you can send only notification or only data(or include both)
-            my_key: 'my value',
-            my_another_key: 'my another value'
-        }
-    };
-
-    fcm.send(message, function (err, response) {
-        if (err) {
-            console.log("Something has gone wrong!");
-        } else {
-            console.log("Successfully sent with response: ", response);
-        }
-    });
-
-    return res.status(200).json({ "message": "notified succesfully" })
-})
 
 
 
